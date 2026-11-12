@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ea580c">
+  <meta name="description" content="Track bike fuel, maintenance, parts, cost per km, and service reminders offline.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VeloLedger">
+  <title>VeloLedger — Bike Cost Management</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="5.5" cy="17.5" r="3.5"/>
+              <circle cx="18.5" cy="17.5" r="3.5"/>
+              <path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">VeloLedger</h1>
+            <p class="brand-subtitle">Bike Cost &amp; Maintenance Tracker</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Main navigation">
+          <button type="button" class="nav-tab is-active" data-view="dashboard">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            <span>Dashboard</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="expenses">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Expenses</span>
+          </button>
+          <button type="button" class="nav-tab" data-view="garage">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Garage &amp; Service</span>
+          </button>
+        </nav>
+
+        <div class="topbar-actions">
+          <div class="bike-switcher">
+            <label for="globalBikeSelect" class="sr-only">Filter by bike</label>
+            <select id="globalBikeSelect" class="select-control" aria-label="Filter by bike"></select>
+          </div>
+          <button type="button" id="installAppBtn" class="btn btn-secondary btn-install hidden" title="Install VeloLedger app">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span class="install-btn-label">Install</span>
+          </button>
+          <button type="button" id="themeToggleBtn" class="btn btn-icon" title="Toggle dark/light theme" aria-label="Toggle dark/light theme">
+            <svg id="themeIconSun" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="themeIconMoon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button type="button" id="openSettingsBtn" class="btn btn-icon" title="Settings &amp; Data" aria-label="Settings and data management">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+          <button type="button" id="addExpenseBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Log Cost</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+      <!-- Sample Data Banner (dismissible / shown when using sample seed) -->
+      <div id="sampleBanner" class="banner hidden" role="status">
+        <div class="banner-content">
+          <span class="banner-badge">Demo Data</span>
+          <span>Exploring with sample bikes and expenses. Ready to track your own rides?</span>
+        </div>
+        <div class="banner-actions">
+          <button type="button" id="clearSampleBtn" class="btn btn-sm btn-ghost">Start Fresh</button>
+          <button type="button" id="dismissBannerBtn" class="btn btn-sm btn-ghost" aria-label="Dismiss banner">Dismiss</button>
+        </div>
+      </div>
+
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view is-active" aria-labelledby="dashHeading">
+        <div class="view-header">
+          <div>
+            <h2 id="dashHeading" class="view-title">Cost Overview</h2>
+            <p id="dashSubtitle" class="view-subtitle">All bikes across your garage</p>
+          </div>
+          <div class="period-filter">
+            <label for="dashboardRange" class="sr-only">Time range</label>
+            <select id="dashboardRange" class="select-control select-sm">
+              <option value="all">All Time</option>
+              <option value="this-month">This Month</option>
+              <option value="last-3m">Last 3 Months</option>
+              <option value="last-6m">Last 6 Months</option>
+              <option value="this-year">This Year</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <article class="card kpi-card">
+            <div class="kpi-label">Running Costs</div>
+            <div id="kpiRunning" class="kpi-value mono">$0.00</div>
+            <div id="kpiRunningMeta" class="kpi-meta">0 logged entries</div>
+          </article>
+          <article class="card kpi-card">
+            <div class="kpi-label">Total Ownership</div>
+            <div id="kpiTco" class="kpi-value mono">$0.00</div>
+            <div id="kpiTcoMeta" class="kpi-meta">Purchase + running costs</div>
+          </article>
+          <article class="card kpi-card">
+            <div class="kpi-label">Running Cost / <span class="unit-dist">km</span></div>
+            <div id="kpiCostPerDist" class="kpi-value mono">—</div>
+            <div id="kpiDistMeta" class="kpi-meta">0 km tracked</div>
+          </article>
+          <article class="card kpi-card">
+            <div class="kpi-label">Monthly Average</div>
+            <div id="kpiMonthlyAvg" class="kpi-value mono">$0.00</div>
+            <div id="kpiMonthlyMeta" class="kpi-meta">Across active months</div>
+          </article>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="charts-grid">
+          <article class="card chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Spending by Category</h3>
+                <p class="card-subtitle">Where your bike budget goes</p>
+              </div>
+            </div>
+            <div id="categoryChartContainer" class="chart-body"></div>
+          </article>
+
+          <article class="card chart-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Monthly Spending Trend</h3>
+                <p class="card-subtitle">Last 6 months of running costs</p>
+              </div>
+            </div>
+            <div id="monthlyChartContainer" class="chart-body"></div>
+          </article>
+        </div>
+
+        <!-- Bottom Row: Recent Expenses & Service Alerts -->
+        <div class="dashboard-bottom-grid">
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Recent Expenses</h3>
+                <p class="card-subtitle">Latest logged bike costs</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" data-goto-view="expenses">View All →</button>
+            </div>
+            <div id="recentExpensesList" class="recent-list"></div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Service &amp; Renewal Alerts</h3>
+                <p class="card-subtitle">Upcoming maintenance intervals</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-ghost" data-goto-view="garage">Manage →</button>
+            </div>
+            <div id="serviceAlertsList" class="alerts-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- EXPENSES VIEW -->
+      <section id="view-expenses" class="view" aria-labelledby="expensesHeading">
+        <div class="view-header">
+          <div>
+            <h2 id="expensesHeading" class="view-title">Expense Ledger</h2>
+            <p id="expensesSummaryMeta" class="view-subtitle">Search, filter, and edit every cost</p>
+          </div>
+          <div class="view-header-actions">
+            <button type="button" id="exportCsvBtn" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export CSV</span>
+            </button>
+            <button type="button" id="addExpenseBtnInline" class="btn btn-primary">+ Log Cost</button>
+          </div>
+        </div>
+
+        <!-- Filters Toolbar -->
+        <div class="card filter-bar">
+          <div class="filter-group filter-search">
+            <label for="expenseSearch" class="sr-only">Search expenses</label>
+            <input type="search" id="expenseSearch" class="input-control" placeholder="Search description, shop, or notes...">
+          </div>
+          <div class="filter-group">
+            <label for="expenseCategoryFilter" class="sr-only">Category</label>
+            <select id="expenseCategoryFilter" class="select-control">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="expenseMonthFilter" class="sr-only">Month</label>
+            <select id="expenseMonthFilter" class="select-control">
+              <option value="all">All Months</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="expenseSort" class="sr-only">Sort by</label>
+            <select id="expenseSort" class="select-control">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="amount-desc">Highest Cost</option>
+              <option value="amount-asc">Lowest Cost</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filtered Subtotal Strip -->
+        <div id="filteredStrip" class="filtered-strip">
+          <span id="filteredCountText">0 expenses</span>
+          <span class="filtered-total">Filtered Total: <strong id="filteredTotalAmount" class="mono">$0.00</strong></span>
+        </div>
+
+        <!-- Table -->
+        <div class="card table-card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Bike</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th class="num-col">Odometer</th>
+                  <th class="num-col">Amount</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expensesTableBody"></tbody>
+            </table>
+          </div>
+          <div id="expensesEmptyState" class="empty-state hidden"></div>
+        </div>
+      </section>
+
+      <!-- GARAGE & SERVICE VIEW -->
+      <section id="view-garage" class="view" aria-labelledby="garageHeading">
+        <div class="view-header">
+          <div>
+            <h2 id="garageHeading" class="view-title">My Garage &amp; Service Schedule</h2>
+            <p class="view-subtitle">Manage bikes, odometer readings, and maintenance intervals</p>
+          </div>
+          <div class="view-header-actions">
+            <button type="button" id="addServiceBtn" class="btn btn-secondary">+ Add Reminder</button>
+            <button type="button" id="addBikeBtn" class="btn btn-primary">+ Add Bike</button>
+          </div>
+        </div>
+
+        <h3 class="section-label">Bikes</h3>
+        <div id="bikesGrid" class="bikes-grid"></div>
+
+        <div class="section-header-row">
+          <h3 class="section-label">Maintenance &amp; Renewal Reminders</h3>
+        </div>
+        <div class="card">
+          <div id="garageServicesList" class="services-table-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: ADD / EDIT EXPENSE -->
+  <div id="expenseModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="expenseModalTitle" class="modal-title">Log Bike Cost</h3>
+        <button type="button" class="btn btn-icon modal-close" data-close-modal="expenseModal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="expenseForm" class="modal-body">
+        <input type="hidden" id="expId">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="expBikeId">Bike <span class="req">*</span></label>
+            <select id="expBikeId" class="select-control" required></select>
+          </div>
+          <div class="form-field">
+            <label for="expDate">Date <span class="req">*</span></label>
+            <input type="date" id="expDate" class="input-control" required>
+          </div>
+          <div class="form-field">
+            <label for="expCategory">Category <span class="req">*</span></label>
+            <select id="expCategory" class="select-control" required></select>
+          </div>
+          <div class="form-field">
+            <label for="expAmount">Total Cost (<span class="currency-symbol">$</span>) <span class="req">*</span></label>
+            <input type="number" id="expAmount" class="input-control mono" min="0" step="0.01" inputmode="decimal" placeholder="0.00" required>
+          </div>
+          <div class="fuel-calc-box form-field-full hidden" id="expFuelField">
+            <div class="fuel-calc-grid">
+              <div class="form-field">
+                <label for="expFuelRate">Fuel Rate (<span class="currency-symbol">$</span> / L or unit)</label>
+                <input type="number" id="expFuelRate" class="input-control mono" min="0" step="0.01" inputmode="decimal" placeholder="e.g., 122.00">
+              </div>
+              <div class="form-field">
+                <label for="expQuantity" id="expQuantityLabel">Auto Fuel Qty (L / kWh)</label>
+                <input type="number" id="expQuantity" class="input-control mono" min="0" step="0.01" inputmode="decimal" placeholder="Auto-calculated">
+              </div>
+            </div>
+            <div id="fuelCalcHint" class="fuel-calc-hint">Set fuel rate &amp; total cost to auto-calculate quantity.</div>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="expTitle">Description <span class="req">*</span></label>
+            <input type="text" id="expTitle" class="input-control" maxlength="100" placeholder="e.g., Synthetic oil &amp; filter change, Rear tire replacement" required>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="expOdometer">Odometer (<span class="unit-dist">km</span>)</label>
+            <input type="number" id="expOdometer" class="input-control mono" min="0" step="1" inputmode="numeric" placeholder="Optional">
+          </div>
+          <div class="form-field form-field-full">
+            <label for="expNotes">Notes / Shop / Vendor</label>
+            <textarea id="expNotes" class="input-control" rows="2" maxlength="400" placeholder="Warranty info, mechanic name, part numbers..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal="expenseModal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveExpenseBtn">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT BIKE -->
+  <div id="bikeModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="bikeModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="bikeModalTitle" class="modal-title">Add Bike to Garage</h3>
+        <button type="button" class="btn btn-icon modal-close" data-close-modal="bikeModal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="bikeForm" class="modal-body">
+        <input type="hidden" id="bikeId">
+        <div class="form-grid">
+          <div class="form-field form-field-full">
+            <label for="bikeName">Bike Name / Model <span class="req">*</span></label>
+            <input type="text" id="bikeName" class="input-control" maxlength="60" placeholder="e.g., Yamaha MT-07, Trek Domane SL5" required>
+          </div>
+          <div class="form-field">
+            <label for="bikeType">Type</label>
+            <select id="bikeType" class="select-control">
+              <option value="Motorcycle">Motorcycle</option>
+              <option value="Road Bike">Road Bike</option>
+              <option value="Mountain Bike">Mountain Bike</option>
+              <option value="Gravel / Hybrid">Gravel / Hybrid</option>
+              <option value="E-Bike">E-Bike</option>
+              <option value="Scooter">Scooter</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="bikeColor">Badge Color</label>
+            <select id="bikeColor" class="select-control">
+              <option value="#ea580c">Signal Orange</option>
+              <option value="#2563eb">Cobalt Blue</option>
+              <option value="#059669">Emerald Green</option>
+              <option value="#7c3aed">Electric Violet</option>
+              <option value="#dc2626">Racing Red</option>
+              <option value="#0d9488">Teal</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="bikePurchasePrice">Purchase Price (<span class="currency-symbol">$</span>)</label>
+            <input type="number" id="bikePurchasePrice" class="input-control mono" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-field">
+            <label for="bikePurchaseDate">Purchase Date</label>
+            <input type="date" id="bikePurchaseDate" class="input-control">
+          </div>
+          <div class="form-field">
+            <label for="bikeStartOdometer">Starting Odometer (<span class="unit-dist">km</span>)</label>
+            <input type="number" id="bikeStartOdometer" class="input-control mono" min="0" step="1" value="0">
+          </div>
+          <div class="form-field">
+            <label for="bikeCurrentOdometer">Current Odometer (<span class="unit-dist">km</span>)</label>
+            <input type="number" id="bikeCurrentOdometer" class="input-control mono" min="0" step="1" value="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal="bikeModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Bike</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT SERVICE REMINDER -->
+  <div id="serviceModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="serviceModalTitle" class="modal-title">Add Service Reminder</h3>
+        <button type="button" class="btn btn-icon modal-close" data-close-modal="serviceModal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="serviceForm" class="modal-body">
+        <input type="hidden" id="srvId">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="srvBikeId">Bike <span class="req">*</span></label>
+            <select id="srvBikeId" class="select-control" required></select>
+          </div>
+          <div class="form-field">
+            <label for="srvType">Trigger Type</label>
+            <select id="srvType" class="select-control">
+              <option value="distance" id="srvTypeDistanceOpt">Distance Interval (km)</option>
+              <option value="date">Due Date / Renewal</option>
+            </select>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="srvTitle">Service Task <span class="req">*</span></label>
+            <input type="text" id="srvTitle" class="input-control" maxlength="80" placeholder="e.g., Engine Oil Change, Chain Wax, Annual Insurance" required>
+          </div>
+          <div class="form-field srv-dist-group">
+            <label for="srvIntervalDist">Interval (<span class="unit-dist">km</span>)</label>
+            <input type="number" id="srvIntervalDist" class="input-control mono" min="1" step="1" placeholder="e.g., 3000">
+          </div>
+          <div class="form-field srv-dist-group">
+            <label for="srvLastDist">Last Serviced At (<span class="unit-dist">km</span>)</label>
+            <input type="number" id="srvLastDist" class="input-control mono" min="0" step="1" placeholder="e.g., 12000">
+          </div>
+          <div class="form-field srv-date-group hidden">
+            <label for="srvDueDate">Due Date</label>
+            <input type="date" id="srvDueDate" class="input-control">
+          </div>
+          <div class="form-field srv-date-group hidden">
+            <label for="srvIntervalMonths">Repeat Every (Months)</label>
+            <input type="number" id="srvIntervalMonths" class="input-control mono" min="0" step="1" placeholder="e.g., 12 (0 = one-time)">
+          </div>
+          <div class="form-field form-field-full">
+            <label for="srvEstCost">Estimated Cost (<span class="currency-symbol">$</span>)</label>
+            <input type="number" id="srvEstCost" class="input-control mono" min="0" step="0.01" placeholder="Optional">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal="serviceModal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Reminder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS & BACKUP -->
+  <div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="settingsModalTitle" class="modal-title">Preferences &amp; Data Backup</h3>
+        <button type="button" class="btn btn-icon modal-close" data-close-modal="settingsModal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="settingsForm" class="form-grid">
+          <div class="form-field">
+            <label for="prefCurrency">Currency Symbol</label>
+            <select id="prefCurrency" class="select-control">
+              <option value="$">$ (USD / CAD / AUD)</option>
+              <option value="€">€ (EUR)</option>
+              <option value="£">£ (GBP)</option>
+              <option value="৳">৳ (BDT)</option>
+              <option value="₹">₹ (INR)</option>
+              <option value="¥">¥ (JPY / CNY)</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="prefUnit">Distance Unit</label>
+            <select id="prefUnit" class="select-control">
+              <option value="km">Kilometers (km)</option>
+              <option value="mi">Miles (mi)</option>
+            </select>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="prefFuelRate">Default Fuel Rate (<span class="currency-symbol">$</span> / L or unit)</label>
+            <input type="number" id="prefFuelRate" class="input-control mono" min="0" step="0.01" inputmode="decimal" placeholder="e.g., 122.00 (auto-calculates fuel quantity)">
+          </div>
+          <div class="form-field form-field-full">
+            <button type="submit" class="btn btn-primary">Save Preferences</button>
+          </div>
+        </form>
+
+        <hr class="divider">
+
+        <div class="data-actions-panel">
+          <h4>Install App (PWA)</h4>
+          <p id="pwaInstallStatus" class="muted-text">Install VeloLedger to your home screen or desktop for offline access.</p>
+          <div class="btn-row">
+            <button type="button" id="settingsInstallBtn" class="btn btn-secondary hidden">Install VeloLedger App</button>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <div class="data-actions-panel">
+          <h4>Backup &amp; Restore</h4>
+          <p class="muted-text">All data stays private in your browser's local storage. Export a JSON backup anytime.</p>
+          <div class="btn-row">
+            <button type="button" id="exportJsonBtn" class="btn btn-secondary">Export JSON Backup</button>
+            <label class="btn btn-secondary file-btn">
+              Import JSON Backup
+              <input type="file" id="importJsonInput" accept=".json,application/json" hidden>
+            </label>
+          </div>
+          <div class="btn-row danger-zone">
+            <button type="button" id="resetSampleBtn" class="btn btn-ghost">Load Sample Data</button>
+            <button type="button" id="clearAllDataBtn" class="btn btn-danger">Clear All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script defer src="js/store.js"></script>
+  <script defer src="js/charts.js"></script>
+  <script defer src="js/app.js"></script>
+</body>
+</html>
